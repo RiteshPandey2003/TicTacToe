@@ -1,149 +1,271 @@
-include<iostream>
-#include<string>
-#include<stdlib.h>
-#define GRID_SIZE 3
-using namespace std;
 
-class Game
-{
-    private:
-      char grid[GRID_SIZE][GRID_SIZE];
-     
-    public:
-    
-      Game(){
-          generate_grid();
-          show_grid();
-          check_for_win();
-          while(true){
-          ask_turn();
-          show_grid();
-          check_for_win();
-          
-          computer_player_turn();
-          show_grid();
-          check_for_win();
-          }
-      }
-      
-      void check_for_win(){
-          const char* winning_moves[8]={
-          "123",
-          "456",
-          "789",
-          "147",
-          "258",
-          "369",
-          "159",
-          "753",
-      };
-      
-      for(int i=0; i<8; i++){
-         bool winner= true;
-         char previous_grid ='0';
-         const char* winning_move=winning_moves[i];
-         for (int index=0; index<GRID_SIZE; index++){
-             char character = winning_move[index];
-             int entered_number = character-'0';
-             int grid_space = entered_number-1;
-             int row = grid_space/GRID_SIZE;
-             int col = grid_space%GRID_SIZE;
-             
-             char grid_char=grid[row][col];
-             
-             if(previous_grid == '0'){
-                 previous_grid=grid_char;
-             }
-             else if(previous_grid == grid_char){
-                 continue;
-             }
-             else{
-                 winner = false;    
-             }
-         }
-         if(winner){
-             puts("*******8  you have winnner ***********");
-             printf("look like %c won , congratulation\n",previous_grid);
-             exit(0);
-             break;
-         } 
-       }
-    }
-          
-      void generate_grid(){
-          int number = 1;
-          for( int x=0; x<GRID_SIZE; x++){
-              for (int y=0; y<GRID_SIZE; y++){
-                  grid[x][y]= to_string(number).c_str()[0];
-                  number+= 1;
-               }
-           }
-      }
-      
-      void show_grid(){
-          printf("\n----------\n");
-          for( int x=0; x<GRID_SIZE; x++){
-              for (int y=0; y<GRID_SIZE; y++){
-                 printf("%c | ", grid[x][y]);     
-              }
-              printf("\n----------\n");
-          }  
-     }
-     
-     void ask_turn(){
-          string input;
-          
-          while (true){
-             puts("where would you like to play");
-             getline(cin,input);
-             
-             if (input !=""){
-                char entered = input.c_str()[0];
-                if(entered >= '1'&& entered <= '9'){
-                    int entered_number = entered - '0'; // cahracter to integer
-                    int index = entered_number - 1;
-                    
-                    int row = index/3;
-                    int col = index%3;
-                    char grid_position = grid[row][col];
-                    if (grid_position == 'X' || grid_position == '0'){
-                       puts("that grid position is already taken!");
-                       }
-                    else{
-                       grid[row][col]='X';
-                       break;
-                       }
-                    }
-                else{
-                    puts("you have to play in range 0-9!");
-                   }
-                 }
-             else{
-                puts("you must enter something");
-                }
-            }
-       }
-       
-       void computer_player_turn(){
-           
-           while(true){
-             int computer_choice = ( rand() % 9 ) + 1 ;
-             int row = (computer_choice-1)/3;
-             int col = (computer_choice-1)%3;
-             char grid_position = grid[row][col];
-             if(grid_position == 'X'|| grid_position == '0'){
-                continue; 
-             }
-             else{
-                printf("the computer will play at %d.\n",computer_choice);
-                grid[row][col]='0';
-                break;
-             }
-           }
-       }
-}; 
-int main(int argc, char *argv[]){
-    
-    Game game;
-    return 0;
+#include<bits/stdc++.h> 
+using namespace std; 
+#define COMPUTER 1 
+#define HUMAN 2 
+#define SIDE 3 
+#define COMPUTERMOVE 'O' 
+#define HUMANMOVE 'X' 
+void showBoard(char board[][SIDE])
+{ 
+	
+	printf("\t\t\t %c | %c | %c \n", board[0][0], board[0][1], board[0][2]); 
+	printf("\t\t\t-----------\n"); 
+	printf("\t\t\t %c | %c | %c \n", board[1][0], board[1][1], board[1][2]); 
+	printf("\t\t\t-----------\n"); 
+	printf("\t\t\t %c | %c | %c \n\n", board[2][0], board[2][1], board[2][2]);  
+}  
+void showInstructions() 
+{ 
+	printf("\nChoose a cell numbered from 1 to 9 as below and play\n\n"); 
+	
+	printf("\t\t\t 1 | 2 | 3 \n"); 
+	printf("\t\t\t-----------\n"); 
+	printf("\t\t\t 4 | 5 | 6 \n"); 
+	printf("\t\t\t-----------\n"); 
+	printf("\t\t\t 7 | 8 | 9 \n\n"); 
+} 
+void initialise(char board[][SIDE]) 
+{	
+	// Initially the board is empty 
+	for (int i=0; i<SIDE; i++) 
+	{ 
+		for (int j=0; j<SIDE; j++) 
+			board[i][j] = ' '; 
+	} 
+} 
+
+void declareWinner(int whoseTurn) 
+{ 
+	if (whoseTurn == COMPUTER) 
+		printf("COMPUTER has won\n"); 
+	else
+		printf("HUMAN has won\n"); 
+} 
+
+bool rowCrossed(char board[][SIDE]) 
+{ 
+	for (int i=0; i<SIDE; i++) 
+	{ 
+		if (board[i][0] == board[i][1] && 
+			board[i][1] == board[i][2] && 
+			board[i][0] != ' ') 
+			return (true); 
+	} 
+	return(false); 
+} 
+ 
+bool columnCrossed(char board[][SIDE]) 
+{ 
+	for (int i=0; i<SIDE; i++) 
+	{ 
+		if (board[0][i] == board[1][i] && 
+			board[1][i] == board[2][i] && 
+			board[0][i] != ' ') 
+			return (true); 
+	} 
+	return(false); 
+} 
+bool diagonalCrossed(char board[][SIDE]) 
+{ 
+	if (board[0][0] == board[1][1] && 
+		board[1][1] == board[2][2] && 
+		board[0][0] != ' ') 
+		return(true); 
+		
+	if (board[0][2] == board[1][1] && 
+		board[1][1] == board[2][0] && 
+		board[0][2] != ' ') 
+		return(true); 
+
+	return(false); 
+} 
+
+bool gameOver(char board[][SIDE]) 
+{ 
+	return(rowCrossed(board) || columnCrossed(board) || diagonalCrossed(board) ); 
 }
+
+int minimax(char board[][SIDE], int depth, bool isAI)
+{
+	int score = 0;
+	int bestScore = 0;
+	if (gameOver(board) == true)
+	{
+		if (isAI == true)
+			return -1;
+		if (isAI == false)
+			return +1;
+	}
+	else
+	{
+		if(depth < 9)
+		{
+			if(isAI == true)
+			{
+				bestScore = -999;
+				for(int i=0; i<SIDE; i++)
+				{
+					for(int j=0; j<SIDE; j++)
+					{
+						if (board[i][j] == ' ')
+						{
+							board[i][j] = COMPUTERMOVE;
+							score = minimax(board, depth + 1, false);
+							board[i][j] = ' ';
+							if(score > bestScore)
+							{
+								bestScore = score;
+							}
+						}
+					}
+				}
+				return bestScore;
+			}
+			else
+			{
+				bestScore = 999;
+				for (int i = 0; i < SIDE; i++)
+				{
+					for (int j = 0; j < SIDE; j++)
+					{
+						if (board[i][j] == ' ')
+						{
+							board[i][j] = HUMANMOVE;
+							score = minimax(board, depth + 1, true);
+							board[i][j] = ' ';
+							if (score < bestScore)
+							{
+								bestScore = score;
+							}
+						}
+					}
+				}
+				return bestScore;
+			}
+		}
+		else
+		{
+			return 0;
+		}
+	}
+}
+
+int bestMove(char board[][SIDE], int moveIndex)
+{
+	int x = -1, y = -1;
+	int score = 0, bestScore = -999;
+	for (int i = 0; i < SIDE; i++)
+	{
+		for (int j = 0; j < SIDE; j++)
+		{
+			if (board[i][j] == ' ')
+			{
+				board[i][j] = COMPUTERMOVE;
+				score = minimax(board, moveIndex+1, false);
+				board[i][j] = ' ';
+				if(score > bestScore)
+				{
+					bestScore = score;
+					x = i;
+					y = j;
+				}
+			}
+		}
+	}
+	return x*3+y;
+}
+void playTicTacToe(int whoseTurn) 
+{ 
+	char board[SIDE][SIDE]; 
+	int moveIndex = 0, x = 0, y = 0;
+
+	initialise(board);
+	showInstructions(); 
+	
+ 
+	while (gameOver(board) == false && moveIndex != SIDE*SIDE) 
+	{ 
+		int n;
+		if (whoseTurn == COMPUTER) 
+		{
+			n = bestMove(board, moveIndex);
+			x = n / SIDE;
+			y = n % SIDE;
+			board[x][y] = COMPUTERMOVE; 
+			printf("COMPUTER has put a %c in cell %d\n\n", COMPUTERMOVE, n+1);
+			showBoard(board);
+			moveIndex ++; 
+			whoseTurn = HUMAN;
+		} 
+		
+		else if (whoseTurn == HUMAN) 
+		{
+			printf("You can insert in the following positions : ");
+			for(int i=0; i<SIDE; i++)
+				for (int j = 0; j < SIDE; j++)
+					if (board[i][j] == ' ')
+						printf("%d ", (i * 3 + j) + 1);
+			printf("\n\nEnter the position = ");
+			scanf("%d",&n);
+			n--;
+			x = n / SIDE;
+			y = n % SIDE; 
+			if(board[x][y] == ' ' && n<9 && n>=0)
+			{
+				board[x][y] = HUMANMOVE; 
+				printf ("\nHUMAN has put a %c in cell %d\n\n", HUMANMOVE, n+1); 
+				showBoard(board); 
+				moveIndex ++; 
+				whoseTurn = COMPUTER;
+			}
+			else if(board[x][y] != ' ' && n<9 && n>=0)
+			{
+				printf("\nPosition is occupied, select any one place from the available places\n\n");
+			}
+			else if(n<0 || n>8)
+			{
+				printf("Invalid position\n");
+			}
+		} 
+	} 
+
+
+	if (gameOver(board) == false && moveIndex == SIDE * SIDE) 
+		printf("It's a draw\n"); 
+	else
+	{ 
+	
+		if (whoseTurn == COMPUTER) 
+			whoseTurn = HUMAN; 
+		else if (whoseTurn == HUMAN) 
+			whoseTurn = COMPUTER; 
+		
+		declareWinner(whoseTurn); 
+	} 
+} 
+
+int main() 
+{ 
+	printf("\n-------------------------------------------------------------------\n\n");
+	printf("\t\t\t Tic-Tac-Toe\n"); 
+	printf("\n-------------------------------------------------------------------\n\n");
+	char cont='y';
+	do {
+		char choice;
+	 	printf("Do you want to start first?(y/n) : ");
+	 	scanf(" %c", &choice);
+
+		if(choice=='n')
+			playTicTacToe(COMPUTER);
+		else if(choice=='y')
+			playTicTacToe(HUMAN);
+		else
+			printf("Invalid choice\n"); 
+        
+		printf("\nDo you want to quit(y/n) : ");
+       		scanf(" %c", &cont);
+	} while(cont=='n');
+	return (0); 
+} 
+   
